@@ -75,8 +75,15 @@ const Hubs = () => {
   const storeSearchQuery = useSelector((state) => state.hubs.search)
   const storeSearchResults = useSelector((state) => state.hubs.searchResults)
   const inputRef = useRef<HTMLInputElement>()
+  // Needs eslint disable because NodeJS is undefined. Too lazy to define it.
+  // eslint-disable-next-line
   let searchTimer: NodeJS.Timeout
 
+  /**
+   * TODO: Make a default search bar because it is more user-friendly
+   * and it can also cause some issues with repetitive API spam and
+   * future unexpected bugs.
+   */
   const search = () => {
     clearTimeout(searchTimer)
     const query = inputRef.current ? inputRef.current.value : null
@@ -99,11 +106,8 @@ const Hubs = () => {
   }
 
   useEffect(() => {
-    window.scrollTo(0, 0)
     dispatch(getHubsList(currentPage))
   }, [currentPage, dispatch])
-
-  console.log(storeSearchResults)
 
   return fetchError ? (
     <ErrorComponent message={fetchError.error.message} />
@@ -124,7 +128,9 @@ const Hubs = () => {
         {isFetched &&
           !storeSearchQuery &&
           data &&
-          data.hubIds.map((e: string, i: number) => <Item data={data.hubRefs[e]} key={i} />)}
+          data.hubIds.map((e: string, i: number) => (
+            <Item data={data.hubRefs[e]} key={i} />
+          ))}
       </List>
       {pagesCount && !storeSearchQuery && (
         <div className={classes.pagination}>

@@ -30,11 +30,11 @@ const useStyles = makeStyles((theme) => ({
   rotate: {},
   text: {
     position: 'relative',
-    top: 10,
+    marginTop: 10,
   },
   collapse: {
-    marginLeft: theme.spacing(2)
-  }
+    marginLeft: theme.spacing(2),
+  },
 }))
 
 const Spoiler = ({ children, title }) => {
@@ -49,7 +49,7 @@ const Spoiler = ({ children, title }) => {
       >
         {title}
       </b>
-      <Collapse className={classes.collapse} mountOnEnter unmountOnExit in={isOpen}>
+      <Collapse className={classes.collapse} in={isOpen}>
         <FormattedText className={classes.text}>
           {ReactDOMServer.renderToStaticMarkup(children)}
         </FormattedText>

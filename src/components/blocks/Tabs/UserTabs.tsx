@@ -11,6 +11,7 @@ interface TabObject {
   match: RegExp
   tab: string
 }
+
 const Counter = ({ children }) => {
   const theme = useTheme()
   return (
@@ -26,6 +27,7 @@ const Counter = ({ children }) => {
     </Fade>
   )
 }
+
 const generateTabs = (user: UserExtendedObject): TabObject[] => [
   {
     label: 'Профиль',
@@ -69,25 +71,32 @@ const generateTabs = (user: UserExtendedObject): TabObject[] => [
 ]
 
 const UserTabs = () => {
-  const user = useSelector((state) => state.user.profile.user.data)
+  const user = useSelector((state) => state.profile.profile.user.data)
   const tabs = generateTabs(user)
   const findPath = (path: string): TabObject => {
     return tabs.find((e) => path.match(e.match))
   }
-  const findPathValue = React.useCallback((path: string): number => {
-    const res = tabs.findIndex((e) => path.match(e.match))
-    return res < 0 ? 0 : res
-  }, [tabs])
+  const findPathValue = React.useCallback(
+    (path: string): number => {
+      const res = tabs.findIndex((e) => path.match(e.match))
+      return res < 0 ? 0 : res
+    },
+    [tabs]
+  )
   const isValidPath = (path: string): boolean => !!findPath(path)
   const location = useLocation()
   const shouldShow = isValidPath(location.pathname)
   const [value, setValue] = useState<number>(findPathValue(location.pathname))
-  const handleChange = (_event: React.ChangeEvent<{}>, newValue: number) => {
+  const handleChange = (
+    _event: React.ChangeEvent<unknown>,
+    newValue: number
+  ) => {
     setValue(newValue)
   }
 
   useEffect(() => setValue(findPathValue(location.pathname)), [
-    location.pathname, findPathValue
+    location.pathname,
+    findPathValue,
   ])
 
   return (

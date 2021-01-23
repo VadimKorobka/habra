@@ -18,8 +18,8 @@ export const About = ({
   classes: additionalClasses,
 }: ComponentWithUserParams) => {
   const classes = useStyles()
-  const user = useSelector((store) => store.user.profile.user.data)
-  
+  const user = useSelector((store) => store.profile.profile.user.data)
+
   return user.description_html ? (
     <div className={additionalClasses}>
       <Typography className={classes.blockTitle}>О себе</Typography>

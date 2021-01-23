@@ -1,5 +1,10 @@
 import React, { useEffect } from 'react'
-import { Typography, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
+import {
+  Typography,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+} from '@material-ui/core'
 import { ComponentWithUserParams } from './index'
 import { makeStyles } from '@material-ui/core/styles'
 import { Link } from 'react-router-dom'
@@ -7,7 +12,7 @@ import { Company } from 'src/interfaces'
 import { useSelector } from 'src/hooks'
 import ProfileCompaniesSkeleton from 'src/components/skeletons/ProfileCompanies'
 import { useDispatch } from 'react-redux'
-import { getUserCompanies } from 'src/store/actions/user'
+import { getProfileCompanies } from 'src/store/actions/profile'
 import UserAvatar from 'src/components/blocks/UserAvatar'
 
 const useStyles = makeStyles((theme) => ({
@@ -31,22 +36,28 @@ const useStyles = makeStyles((theme) => ({
 const Companies = ({ classes: additionalClasses }: ComponentWithUserParams) => {
   const classes = useStyles()
   const dispatch = useDispatch()
-  const user = useSelector((store) => store.user.profile.user.data)
-  const companies = useSelector(
-    (store) => store.user.profile.companies.data
+  const profile = useSelector((store) => store.profile.profile.user.data)
+  const companies = useSelector((store) => store.profile.profile.companies.data)
+  const isFetched = useSelector(
+    (store) => store.profile.profile.companies.fetched
   )
-  const isFetched = useSelector((store) => store.user.profile.companies.fetched)
   const isFetching = useSelector(
-    (store) => store.user.profile.companies.fetching
+    (store) => store.profile.profile.companies.fetching
   )
-  const fetchError = useSelector((store) => store.user.profile.companies.error)
+  const fetchError = useSelector(
+    (store) => store.profile.profile.companies.error
+  )
 
   useEffect(() => {
-    dispatch(getUserCompanies(user.login))
-  }, [user.login, dispatch])
+    dispatch(getProfileCompanies(profile.login))
+  }, [profile.login, dispatch])
 
   const Item = ({ data }: { data: Company }) => (
-    <ListItem style={{ paddingLeft: 0, paddingRight: 0 }} component={Link} to={'/company/' + data.name}>
+    <ListItem
+      style={{ paddingLeft: 0, paddingRight: 0 }}
+      component={Link}
+      to={'/company/' + data.name}
+    >
       <ListItemAvatar>
         <UserAvatar
           className={classes.avatar}

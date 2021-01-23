@@ -4,6 +4,7 @@ export interface User {
   id: number
   login: string
   fullname: string
+  /** Support for API version 1 */
   avatar: string
   avatarUrl: string
   speciality: string
@@ -19,7 +20,7 @@ export interface UserCompanies {
 }
 
 export interface UserHubs {
-  hubs: Hub.Hub[]
+  hubs: Hub[]
 }
 
 export interface UserChildren {

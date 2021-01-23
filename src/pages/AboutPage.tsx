@@ -25,9 +25,13 @@ const useStyles = makeStyles((theme) => ({
 const AboutPage = () => {
   const classes = useStyles()
   const Text = ({ index, children, ...props }) => (
-    <Fade in timeout={1000} style={{
-      transitionDelay: `${index / 4}s`,
-    }}>
+    <Fade
+      in
+      timeout={1000}
+      style={{
+        transitionDelay: `${index / 4}s`,
+      }}
+    >
       <div>
         <Typography className={classes.text} {...props}>
           {children}
@@ -49,7 +53,7 @@ const AboutPage = () => {
           </a>
           &nbsp;можно делать все то же самое, что и на оригинальном&nbsp;
           <a className={classes.link} href="https://habr.com">
-            Habrahabr{'\''}e
+            Habrahabr
           </a>
           . В чём разница, спросите вы? Удобство, красота и юзабилити - вот к
           чему стремится неофициальный клон одной из крупнейших площадок Рунета
@@ -87,10 +91,8 @@ const AboutPage = () => {
         </>
       ),
       props: { variant: 'body1', style: { fontSize: 18, lineHeight: '28px' } },
-    }
+    },
   ]
-
-  React.useEffect(() => window.scrollTo(0, 0), [])
 
   return (
     <Container>

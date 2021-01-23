@@ -18,13 +18,13 @@ const LinkTabMemoized = React.memo(LinkTab)
 export interface TabObject {
   label: React.ReactElement | string
   to: () => string
-  match: RegExp
+  match: string[] | string | RegExp | RegExp[]
   tab: string
 }
 
 interface Params {
   tabs: TabObject[]
-  onChange: (event: React.ChangeEvent<{}>, value: number) => void
+  onChange: (event: React.ChangeEvent<unknown>, value: number) => void
   value: number
   hidden: boolean
   shouldUseLinks?: boolean
@@ -51,7 +51,12 @@ const TabsComponent = ({
       className={classes.root}
     >
       {tabs.map(({ to, label }, i: number) => (
-        <LinkTabMemoized isLink={shouldUseLinks} to={to()} label={label} key={i} />
+        <LinkTabMemoized
+          isLink={shouldUseLinks}
+          to={to()}
+          label={label}
+          key={i}
+        />
       ))}
     </Tabs>
   )

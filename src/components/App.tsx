@@ -11,7 +11,9 @@ import isMobile from 'is-mobile'
 import Footer from './blocks/Footer'
 import { useSelector } from 'src/hooks'
 import Tabs from './blocks/Tabs/RouterTabs'
-// import StartupDialog from './StartupDialog'
+import ScrollRestoration from 'react-scroll-restoration'
+import RouterTitleChange from './RouterTitleChange'
+import { SnackbarProvider } from 'notistack'
 
 const chromeAddressBarHeight = 56
 const isDarkTheme = (t: ThemeOptions) => t.palette.type === 'dark'
@@ -27,6 +29,10 @@ const useStyles = makeStyles(() => ({
     margin: '48px auto 0 auto',
   },
   root: {
+    /** Disable blue highlight for links. Can be bad for accessibility. */
+    '& a': {
+      '-webkit-tap-highlight-color': 'rgba(0, 0, 0, 0)',
+    },
     backgroundColor: (theme: ThemeOptions) =>
       theme.palette.type === 'dark'
         ? darken(theme.palette.background.paper, 0.5)
@@ -68,7 +74,7 @@ const useStyles = makeStyles(() => ({
   },
 }))
 
-const Layout = (): React.ReactElement => {
+const App = (): React.ReactElement => {
   const storeTheme = useSelector((state) => state.settings.theme)
   const theme = createMuiTheme(storeTheme)
   const classes = useStyles(theme)
@@ -78,17 +84,24 @@ const Layout = (): React.ReactElement => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Router>
-        {/* <StartupDialog /> */}
-        <AppBar />
-        <div className={classes.app}>
-          <Tabs />
-          <AppRouter />
-        </div>
-        <Footer />
-      </Router>
+      <SnackbarProvider>
+        <Router>
+          {/** Restores user scroll */}
+          <ScrollRestoration />
+
+          {/** Change document title on routing */}
+          <RouterTitleChange />
+
+          <AppBar />
+          <div className={classes.app}>
+            <Tabs />
+            <AppRouter />
+          </div>
+          <Footer />
+        </Router>
+      </SnackbarProvider>
     </ThemeProvider>
   )
 }
 
-export default Layout
+export default App

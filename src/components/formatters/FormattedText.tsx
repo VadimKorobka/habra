@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { makeStyles, fade } from '@material-ui/core/styles'
+import { makeStyles, fade, useTheme } from '@material-ui/core/styles'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { monokai as style } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 import Spoiler from '../blocks/Spoiler'
@@ -7,11 +7,20 @@ import parse, { domToReact, HTMLReactParserOptions } from 'html-react-parser'
 import LazyLoadImage from '../blocks/LazyLoadImage'
 import Details from '../blocks/Details'
 import Iframe from 'react-iframe'
+import { Node as MathJaxNode } from '@nteract/mathjax'
+
+type FloatType = 'left' | 'right'
+interface IframeResizeData {
+  type: string
+  id: number
+  height: number
+}
 
 const useStyles = makeStyles((theme) => ({
   img: {
     maxWidth: '100%',
-    width: '100%',
+    verticalAlign: 'middle',
+    height: 'auto',
   },
   text: {
     '& a': {
@@ -30,9 +39,10 @@ const useStyles = makeStyles((theme) => ({
       borderRadius: theme.shape.borderRadius,
       wordBreak: 'break-word',
     },
-    '& table': {
+    '& div.scrollable-table': {
       overflow: 'auto',
-      display: 'block',
+    },
+    '& table': {
       width: '100%',
       borderCollapse: 'collapse',
     },
@@ -41,6 +51,7 @@ const useStyles = makeStyles((theme) => ({
       border: '1px solid ' + theme.palette.text.hint,
       verticalAlign: 'top',
       lineHeight: '1.5',
+      minWidth: 100,
     },
     '& h1, h2, h3, h4, h5, h6': {
       margin: theme.spacing(2) + 'px 0 0 0',
@@ -67,9 +78,13 @@ const useStyles = makeStyles((theme) => ({
         color: theme.palette.text.secondary,
         fontSize: theme.typography.body2.fontSize,
         textAlign: 'center',
-        marginTop: theme.spacing(0.5),
+        marginTop: theme.spacing(1),
         lineHeight: '18px',
       },
+    },
+    // MathJaxNode overflow fix
+    '& span.mjx-chtml': {
+      whiteSpace: 'normal',
     },
   },
   syntaxHighlighter: {
@@ -96,7 +111,10 @@ const FormattedText = ({
   ...props
 }) => {
   const classes = useStyles(disableParagraphMargin)
-  const [iframeHeights, setIframeHeights] = React.useState<Record<string, number>>({})
+  const [iframeHeights, setIframeHeights] = React.useState<
+    Record<string, number>
+  >({})
+  const theme = useTheme()
   const options: HTMLReactParserOptions = {
     replace: ({ name, children, attribs }): void | React.ReactElement => {
       if (name === 'pre') {
@@ -117,17 +135,39 @@ const FormattedText = ({
         )
       }
       if (name === 'img') {
+        if (attribs['data-tex']) {
+          const formula = attribs['alt'].slice(1, attribs['alt'].length - 1)
+          return (
+            <MathJaxNode inline={attribs['data-tex'] === 'inline'}>
+              {formula}
+            </MathJaxNode>
+          )
+        }
+
+        const imgStyles = {
+          float: (attribs.align || 'none') as FloatType,
+          marginRight: attribs.align === 'left' ? theme.spacing(2) : 0,
+          marginLeft: attribs.align === 'right' ? theme.spacing(2) : 0,
+          marginBottom: attribs.align ? theme.spacing(1) : 0,
+          maxWidth: attribs.align ? '40%' : '100%',
+          width: attribs['data-width'] || 'auto',
+        }
+
         return (
           <LazyLoadImage
             placeholder={
               <img
                 src={attribs.src}
                 alt={attribs.alt || 'Image'}
+                style={imgStyles}
                 className={classes.img}
               />
             }
-            src={attribs['data-src']}
+            // First try to load src from 'data-src' attribute
+            // If not found, then use default 'src' attribute
+            src={attribs['data-src'] || attribs.src}
             alt={attribs.alt || 'Image'}
+            style={imgStyles}
             className={classes.img}
           />
         )
@@ -167,15 +207,17 @@ const FormattedText = ({
   }
 
   React.useEffect(() => {
-    window.addEventListener('message', (e) => {
-      if (e.data.type === 'embed-size') {
-        setIframeHeights(prev => ({ ...prev, [e.data.id]: e.data.height || 'auto' }))
-      }
-    })
+    const handler = (e: MessageEvent<IframeResizeData>) => {
+      e.data.type === 'embed-size' &&
+        setIframeHeights((prev) => ({
+          ...prev,
+          [e.data.id]: e.data.height || 'auto',
+        }))
+    }
+    window.addEventListener('message', handler)
     return () => {
       // Remove listener on cleanup
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      window.removeEventListener('message', () => {})
+      window.removeEventListener('message', handler)
     }
   }, [])
 
